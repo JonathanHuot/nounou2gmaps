@@ -61,6 +61,7 @@ def index():
 
 
 @bottle.get("/marker.json")
+@bottle.get("/nounous/marker.json")
 def marker():
     return nounoufile2json(path.join(path.dirname(path.realpath(__file__)), "ListeAssMat-2015-05-13.txt"))
 
