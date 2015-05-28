@@ -54,6 +54,7 @@ def nounoufile2json(filename):
 
 
 @bottle.get("/")
+@bottle.get("/nounous")
 def index():
     from bottle import template
     return template("nounou2gmaps.html")
