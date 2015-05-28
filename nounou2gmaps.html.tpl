@@ -19,7 +19,7 @@ $(document).ready(function () {
     };
     map = new google.maps.Map($('#map_canvas')[0], myOptions);
 
-    $.getJSON('/marker.json', null, function (addresses) {
+    $.getJSON('/nounous/marker.json', null, function (addresses) {
         $.each(addresses.addresses, function (key, address) {
           if(address !== null) {
           $.getJSON('http://maps.googleapis.com/maps/api/geocode/json?address='+address+'&sensor=false', null, function (data) {
