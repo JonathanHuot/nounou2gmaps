@@ -54,13 +54,17 @@ def nounoufile2json(filename):
 
 
 @bottle.get("/")
+def home():
+    from bottle import redirect
+    redirect("/nounous")
+
+
 @bottle.get("/nounous")
 def index():
     from bottle import template
     return template("nounou2gmaps.html")
 
 
-@bottle.get("/marker.json")
 @bottle.get("/nounous/marker.json")
 def marker():
     return nounoufile2json(path.join(path.dirname(path.realpath(__file__)), "ListeAssMat-2015-05-13.txt"))
