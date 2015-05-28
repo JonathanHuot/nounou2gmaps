@@ -13,7 +13,7 @@ $(document).ready(function () {
     var map;
     var elevator;
     var myOptions = {
-        zoom: 12,
+        zoom: 13,
         center: new google.maps.LatLng(43.185453, 5.608864),
         mapTypeId: 'terrain'
     };
@@ -31,7 +31,7 @@ $(document).ready(function () {
                   title: addresses.titles[key]
               });
               var infowindow = new google.maps.InfoWindow({
-                  content: addresses.titles[key] + "</br>" + address + "</br>" + addresses.phones[key] + "</br>" + addresses.extras[key] 
+                  content: "<h4>" + addresses.titles[key] + "</h4></br>" + address + "</br><strong>" + addresses.phones[key] + "</strong></br>" + addresses.extras[key] 
               });
               google.maps.event.addListener(marker, 'click', function() {
                  infowindow.open(map, marker);
@@ -43,7 +43,14 @@ $(document).ready(function () {
 
 });
     </script>
+    <style>
+      html, body, #map_canvas {
+        height: 100%;
+        margin: 0px;
+        padding: 0px
+      }
+    </style>
 </head>
 <body class="container" ng-app="prelaunchApp">
-<div id="map_canvas" style="width: 500px; height: 500px;"></div></body>
+<div id="map_canvas"></div></body>
 </html>
