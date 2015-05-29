@@ -51,9 +51,6 @@ def nounoupattern(nounou, line):
 
 
 def nounou2json(nounou, line):
-    if re.match("Madame MARTIN", line):
-        import pdb; pdb.set_trace();
-
     if nounou["state"] != State.EXTRA:
         newline = nounoupattern(nounou, line)
         if newline is not None:

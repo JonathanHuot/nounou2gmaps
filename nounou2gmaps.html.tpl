@@ -19,25 +19,28 @@ $(document).ready(function () {
     };
     map = new google.maps.Map($('#map_canvas')[0], myOptions);
 
-    $.getJSON('/nounous/marker.json', null, function (addresses) {
-        $.each(addresses.addresses, function (key, address) {
-          if(address !== null) {
-          $.getJSON('http://maps.googleapis.com/maps/api/geocode/json?address='+address+'&sensor=false', null, function (data) {
-              var p = data.results[0].geometry.location
+    $.getJSON('/nounous/marker.json', null, function (result) {
+        $.each(result.nounous, function (key, nounou) {
+          $.getJSON('http://maps.googleapis.com/maps/api/geocode/json?address='+nounou.address+'&sensor=false', null, function (data) {
+            if (data.results[0] === undefined) {
+              console.log("nounou: " + nounou.title + " don't have a valid address: " + nounou.address);
+            }
+            else {
+              var p = data.results[0].geometry.location;
               var latlng = new google.maps.LatLng(p.lat, p.lng);
               var marker = new google.maps.Marker({
                   position: latlng,
                   map: map,
-                  title: addresses.titles[key]
+                  title: nounou.title
               });
               var infowindow = new google.maps.InfoWindow({
-                  content: "<h4>" + addresses.titles[key] + "</h4></br>" + address + "</br><strong>" + addresses.phones[key] + "</strong></br>" + addresses.extras[key] 
+                  content: "<h4>" + nounou.title + "</h4></br>" + nounou.address + "</br><strong>" + nounou.phone + "</strong></br>" + nounou.extra 
               });
               google.maps.event.addListener(marker, 'click', function() {
                  infowindow.open(map, marker);
               });
+            }
           });
-          }
         });
     });
 
