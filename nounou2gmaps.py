@@ -1,55 +1,117 @@
+# -*- coding: utf-8 -*-
 import bottle
 from bottle import view
 from bottle import get
 from bottle import app
+import re
 
 
 def enum(**enums):
     return type('Enum', (), enums)
 
 
+State = enum(NONE=0, TITLE=1, ADDRESS=2, EXTRA=3)
+
+
+patterns = [
+    {
+        "pattern": r'(0[0-9](\.| )?[0-9][0-9](\.| )?[0-9][0-9](\.| )?[0-9][0-9](\.| )?[0-9][0-9])',
+        "attribute": "phone",
+        "clean": "[. -]"
+    },
+    {
+        "pattern": r'(13600 LA CIOTAT)',
+        "attribute": "city",
+        "state": State.ADDRESS
+    },
+    {
+        "pattern": r'( ([0-9]+|CHE|AV|RUE|IMP) .*)',
+        "attribute": "address",
+        "state": State.ADDRESS
+    },
+    {
+        "pattern": r'((Journée|Périscolaire).*)',
+        "attribute": "extra",
+        "state": State.EXTRA
+    }
+]
+
+def nounoupattern(nounou, line):
+    for p in patterns:
+        found = re.search(p["pattern"], line)
+        if found:
+            if "clean" in p:
+                nounou[p["attribute"]] += " " + re.sub(p["clean"], "", found.group(1))
+            else:
+                nounou[p["attribute"]] += " " + found.group(1)
+            if "state" in p:
+                nounou["state"] = p["state"]
+            return re.sub(p["pattern"], '', line)
+    return None
+
+
+def nounou2json(nounou, line):
+    if re.match("Madame MARTIN", line):
+        import pdb; pdb.set_trace();
+
+    if nounou["state"] != State.EXTRA:
+        newline = nounoupattern(nounou, line)
+        if newline is not None:
+            line = newline
+
+    if not line.strip(" ,\r\n"):
+        return
+
+    if nounou["state"] == State.TITLE:
+        nounou["title"] += " " + line
+    elif nounou["state"] == State.ADDRESS:
+        nounou["address"] += ", " + line
+    elif nounou["state"] == State.EXTRA:
+        nounou["extra"] += " " + line
+
+
+def cleanup(nounou):
+    if nounou:
+        del nounou["state"]
+        if "city" in nounou:
+            nounou["address"] += ", " + nounou["city"]
+            del nounou["city"]
+
+        nounou["title"] = nounou["title"].strip(" ,\r\n")
+        nounou["extra"] = nounou["extra"].strip(" ,\r\n")
+        nounou["phone"] = nounou["phone"].strip(" ,\r\n")
+        nounou["address"] = re.sub(", ,", ",", re.sub("[\r\n]", "", re.sub(", ,", ",", nounou["address"].strip(" ,\r\n"))))
+
+
 def nounoufile2json(filename):
-    import re
+    nounous = []
+    nounou = None
+
     with open(filename) as f:
         content = f.readlines()
-        titles = len(content)*[None]
-        addresses = len(content)*[None]
-        extras = len(content)*[None]
-        phones = len(content)*[None]
 
-        State = enum(NONE=0, TITLE=1, CITY=2, ADDRESS=3, EXTRA=4)
         state = State.NONE
-        index = -1
-        for i, line in enumerate(content):
+        for line in content:
+            line = line.strip(" ,\r\n")
             if re.match('^Madame', line):
-                state = State.TITLE
-                index=index+1
-            elif re.match('^Journ', line):
-                state = State.EXTRA
+                # cleanup nounou
+                cleanup(nounou)
 
-            regtel = r'([0-9][0-9](\.| )?[0-9][0-9](\.| )?[0-9][0-9](\.| )?[0-9][0-9](\.| )?[0-9][0-9])'
-            tel = re.search(regtel, line)
-            if tel:
-                phones[index] = tel.group(1)
-                line = re.sub(regtel, '', line)
+                # create nounou
+                nounou = {
+                    "state": State.TITLE,
+                    "title": "",
+                    "city": "",
+                    "phone": "",
+                    "address": "",
+                    "extra": ""
+                }
+                nounous.append(nounou)
 
-            if state == State.TITLE:
-                titles[index] = line
-                state=state+1
-            elif state == State.CITY:
-                addresses[index] = line
-                state=state+1
-            elif state == State.ADDRESS:
-                addresses[index] = "{0}, {1}".format(line, addresses[index] if addresses[index] else "")
-                state=state+1
-            elif state == State.EXTRA:
-                extras[index] = "{0} {1}".format(line, extras[index] if extras[index] else "")
-
+            nounou2json(nounou, line)
+    cleanup(nounou)
     return {
-        'titles': titles,
-        'phones': phones,
-        'addresses': addresses,
-        'extras': extras
+        'nounous': nounous
     }
 
 
