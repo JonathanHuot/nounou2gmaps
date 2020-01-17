@@ -1,0 +1,10 @@
+Dockerfile
+*.pyc
+*.pyo
+*.pyd
+__pycache__
+env
+linux
+make-env.sh
+*.pdf
+environ.sh

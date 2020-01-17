@@ -1,0 +1,13 @@
+version: '3.7'
+services:
+  paperboy:
+    environment:
+      PORT: 8787
+      DEBUG: "true"
+      GOOGLE_GEOCODING_APIKEY: "AIzaSyArCT3t3xw9_az4qN8bAhc_B5qpviw99BQ"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "8787:8787"
