@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 import bottle
-from bottle import view
-from bottle import get
-from bottle import app
+import os
+from os import path
 import re
+
+
+bottle.TEMPLATE_PATH.append(path.join(path.dirname(path.realpath(__file__)), "."))
+app = bottle.Bottle()
 
 
 def enum(**enums):
@@ -35,6 +38,7 @@ patterns = [
         "state": State.EXTRA
     }
 ]
+
 
 def nounoupattern(nounou, line):
     for p in patterns:
@@ -112,25 +116,33 @@ def nounoufile2json(filename):
     }
 
 
-@bottle.get("/")
+@app.get("/")
 def home():
     from bottle import redirect
     redirect("/nounous")
 
 
-@bottle.get("/nounous")
+@app.get("/nounous")
 def index():
     from bottle import template
-    return template("nounou2gmaps.html")
+    return template(
+        "nounou2gmaps.html",
+        geo_key=os.environ.get(
+            "GOOGLE_GEOCODING_APIKEY",
+            "Set your Google Geocoding API key"
+        )
+    )
 
 
-@bottle.get("/nounous/marker.json")
+@app.get("/nounous/marker.json")
 def marker():
-    return nounoufile2json(path.join(path.dirname(path.realpath(__file__)), "ListeAssMat-2015-05-13.txt"))
+    nounoudict = nounoufile2json(path.join(path.dirname(path.realpath(__file__)), "ListeAssMat-2015-05-13.txt"))
+
+    # for testing API, enable DEBUG and it returns only first 2 records
+    if os.environ.get("DEBUG", None) == "true":
+        nounoudict["nounous"] = nounoudict["nounous"][:2]
+    return nounoudict
 
 
-from bottle import TEMPLATE_PATH
-from os import path
-TEMPLATE_PATH.append(path.join(path.dirname(path.realpath(__file__)), "."))
-from bottle import run
-run(port=8787)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=os.environ.get("PORT", 8787))

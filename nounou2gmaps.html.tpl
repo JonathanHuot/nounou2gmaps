@@ -1,13 +1,13 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr" dir="ltr">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="https://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr" dir="ltr">
 <head>
     <title>Adresses des Nounous</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
-    <script src="http://maps.google.com/maps/api/js?sensor=false&.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?sensor=false&key={{geo_key}}"></script>
     <script type="text/javascript">
 $(document).ready(function () {
     var map;
@@ -21,9 +21,9 @@ $(document).ready(function () {
 
     $.getJSON('/nounous/marker.json', null, function (result) {
         $.each(result.nounous, function (key, nounou) {
-          $.getJSON('http://maps.googleapis.com/maps/api/geocode/json?address='+nounou.address+'&sensor=false', null, function (data) {
+          $.getJSON('https://maps.googleapis.com/maps/api/geocode/json?address='+nounou.address+'&sensor=false&key={{geo_key}}', null, function (data) {
             if (data.results[0] === undefined) {
-              console.log("nounou: " + nounou.title + " don't have a valid address: " + nounou.address);
+              console.log("nounou: " + nounou.title + " doesn't have a valid address: " + nounou.address);
             }
             else {
               var p = data.results[0].geometry.location;
