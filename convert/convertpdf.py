@@ -1,7 +1,7 @@
-//
-// Python script to try if PDF can be converted automatically.
-// With current List.pdf, that's not possible !! 
-//
+#
+#  Python script to try if PDF can be converted automatically.
+#  With current List.pdf, that's not possible !!
+#
 from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
 from pdfminer.layout import LAParams
 from pdfminer.pdfpage import PDFPage
@@ -80,7 +80,6 @@ def convert_pdf_to_xml(path):
     return text
 
 
-  
 def convert_pdf_to_csv(path):
     from cStringIO import StringIO  
     from pdfminer.converter import LTChar, TextConverter
@@ -126,3 +125,23 @@ def convert_pdf_to_csv(path):
     device.close()
     retstr.close()
     return text
+
+
+if __name__ == "__main__":
+    import sys
+
+    assert len(sys.argv) == 4
+    action = sys.argv[1]
+    source = sys.argv[2]
+    dest = sys.argv[3]
+    if action == "txt":
+        result = convert_pdf_to_txt(source)
+    if action == "html":
+        result = convert_pdf_to_html(source)
+    if action == "csv":
+        result = convert_pdf_to_csv(source)
+    if action == "xml":
+        result = convert_pdf_to_xml(source)
+
+    with open(dest, "w") as fd:
+        fd.write(result)

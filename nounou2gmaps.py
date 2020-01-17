@@ -28,7 +28,12 @@ patterns = [
         "state": State.ADDRESS
     },
     {
-        "pattern": r'( ([0-9]+|CHE|AV|RUE|IMP) .*)',
+        "pattern": r'(13600)',
+        "attribute": "city",
+        "state": State.ADDRESS
+    },
+    {
+        "pattern": r'( ([0-9]+|CHE|AV|RUE|IMP|CLOS|VILLA) .*)',
         "attribute": "address",
         "state": State.ADDRESS
     },
@@ -86,15 +91,24 @@ def cleanup(nounou):
 
 def nounoufile2json(filename):
     nounous = []
-    nounou = None
+    nounou = {
+        "state": State.TITLE,
+        "title": "",
+        "city": "",
+        "phone": "",
+        "address": "",
+        "extra": ""
+    }
 
     with open(filename) as f:
         content = f.readlines()
 
-        state = State.NONE
         for line in content:
             line = line.strip(" ,\r\n")
-            if re.match('^Madame', line):
+            if not line:
+                continue
+
+            if re.search('Madame', line):
                 # cleanup nounou
                 cleanup(nounou)
 
